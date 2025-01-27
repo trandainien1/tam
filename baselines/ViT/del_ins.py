@@ -1,5 +1,4 @@
-from .datasets.datasets import get_dataset
-
+import sys
 import os
 import torch
 from torch import nn
@@ -14,6 +13,7 @@ from PIL import Image
 
 import argparse
 
+from datasets import get_dataset
 
 # blur
 def gkern(klen, nsig):
