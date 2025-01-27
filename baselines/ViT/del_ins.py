@@ -13,7 +13,7 @@ from PIL import Image
 
 import argparse
 
-from datasets import get_dataset
+from nien_datasets import get_dataset
 
 # blur
 def gkern(klen, nsig):
