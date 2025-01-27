@@ -398,7 +398,7 @@ if __name__ == '__main__':
     # Load batch of images
     data_loader = torch.utils.data.DataLoader(
         sub_dataset, batch_size=batch_size, shuffle=True,
-        num_workers=8, pin_memory=True)
+        num_workers=4, pin_memory=True)
 
     images = np.empty((len(data_loader), batch_size, 3, img_size, img_size))
     iterator = tqdm(data_loader, total=len(data_loader))
