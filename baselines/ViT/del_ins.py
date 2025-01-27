@@ -12,6 +12,7 @@ from PIL import Image
 
 import argparse
 
+from .datasets import get_dataset
 
 # blur
 def gkern(klen, nsig):
@@ -335,7 +336,11 @@ if __name__ == '__main__':
 
     scores = {'del': [], 'ins': []}
 
-    dataset = datasets.ImageFolder('/root/datasets/ImageNet/val', preprocess)
+    # ----------- get dataset -----------
+    # dataset = datasets.ImageFolder('/root/datasets/ImageNet/val', preprocess)
+
+    dataset, n_output = get_dataset(name='imagenet', root='.')
+
     np.random.seed(0)
     max_index = np.random.randint(num_samples, len(dataset))
     print("subset indices: ", [max_index-num_samples, max_index])
