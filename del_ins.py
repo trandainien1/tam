@@ -390,9 +390,10 @@ if __name__ == '__main__':
     dataset, n_output = get_dataset(name='imagenet', root='.')
 
     np.random.seed(0)
-    max_index = np.random.randint(num_samples, len(dataset))
-    print("subset indices: ", [max_index-num_samples, max_index])
-    sub_dataset = torch.utils.data.Subset(dataset, indices=range(max_index-num_samples, max_index))
+    # max_index = np.random.randint(num_samples, len(dataset))
+    # print("subset indices: ", [max_index-num_samples, max_index])
+    # sub_dataset = torch.utils.data.Subset(dataset, indices=range(max_index-num_samples, max_index))
+    sub_dataset = dataset
     
     # Load batch of images
     data_loader = torch.utils.data.DataLoader(
