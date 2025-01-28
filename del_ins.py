@@ -25,6 +25,7 @@ from torchvision.datasets.imagenet import ImageNet
 
 import timm
 import AGC_methods.AGCAM.ViT_for_AGCAM as ViT_Ours
+from einops.layers.torch import Reduce, Rearrange
 
 # -------------------- datasets ---------------------
 datasets_dict = {
