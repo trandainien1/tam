@@ -641,7 +641,7 @@ if __name__ == '__main__':
         elif args.method == 'better_agc':
             saliency_map = it(img.cuda()) #saliency_map.shape = [14, 14]
             saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
-            saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 1, 14, 14]
+            # saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 1, 14, 14]
             
             # Reshape the mask to have the same size with the original input image (224 x 224)
             upsample = torch.nn.Upsample(224, mode = 'bilinear', align_corners=False)
