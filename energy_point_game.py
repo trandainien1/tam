@@ -270,7 +270,7 @@ def energy_point_game(bboxes_batch, saliency_map):
         #         print('[DEBUG] bbox shape: ', bbox.shape)
         #         x1, y1, x2, y2 = map(lambda x: int(x * 224), bbox)
         #         gt[i, y1:y2, x1:x2] = 1
-        gt = box_to_seg(bboxes_batch).to('cuda')
+        gt = box_to_seg(bboxes_batch)
 
         TP = (saliency_map * gt).sum()  
 
