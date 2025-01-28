@@ -440,6 +440,7 @@ class BetterAGC:
 
     def __call__(self, x, class_idx=None):
 
+        print('[DEBUG]', x.shape)
         # Check that we get only one image
         assert x.dim() == 3 or (x.dim() == 4 and x.shape[0] == 1), "Only one image can be processed at a time"
 
@@ -574,7 +575,7 @@ if __name__ == '__main__':
     # Load batch of images
     data_loader = torch.utils.data.DataLoader(
         sub_dataset, batch_size=batch_size, shuffle=True,
-        num_workers=1, pin_memory=True)
+        num_workers=4, pin_memory=True)
 
     images = np.empty((len(data_loader), batch_size, 3, img_size, img_size))
     iterator = tqdm(data_loader, total=len(data_loader))
