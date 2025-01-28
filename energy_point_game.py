@@ -17,13 +17,18 @@ import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from PIL import Image
 from matplotlib import pyplot as plt
+import pandas as pd
 
 class ImageNetBboxDataset(Dataset):
     def __init__(self, img_path, anno_path, transform, num_samples=1, seed=0):
         print(f'ramdon seed: {seed}, num_samples: {num_samples}')
         np.random.seed(seed)
         imgs = glob.glob(os.path.join(img_path, '*.JPEG'))
-        indices = np.random.randint(len(imgs), size=num_samples)
+        
+        file_name = 'datasets/2000idx_ILSVRC2012.csv'
+        indices = pd.read_csv(file_name, header=None)[0].to_numpy()
+        # indices = np.random.randint(len(imgs), size=num_samples)
+
         self.imgs = np.array(imgs)[indices]
         self.annos = []
         for img in self.imgs:
