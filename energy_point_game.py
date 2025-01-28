@@ -275,7 +275,7 @@ class ImageNetDataset_val(ImageFolder):
         self.img_dir = os.path.join(root_dir, "Data", "CLS-LOC", "val")
         self.annotation_dir = os.path.join(root_dir, "Annotations", "CLS-LOC", "val")
         self.classes = sorted(os.listdir(self.img_dir))
-        print('[DEBUG] classes: ', self.classes)
+        
         self.transforms = transforms
         self.img_data = []
         self.img_labels = []
@@ -283,7 +283,7 @@ class ImageNetDataset_val(ImageFolder):
         for idx, cls in enumerate(self.classes):
             # self.class_name.append(cls)
             img_cls_dir = os.path.join(self.img_dir, cls)
-
+            print('[DEBUG]', img_cls_dir)
             for img in glob(os.path.join(img_cls_dir, '*.JPEG')):
                 self.img_data.append(img)
                 self.img_labels.append(idx)
