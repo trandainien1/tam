@@ -258,6 +258,7 @@ def box_to_seg(box_cor):
 
 def energy_point_game(bboxes_batch, saliency_map):
   
+    print('[DEBUG]', saliency_map.shape)
     b, w, h = saliency_map.shape
 
     gt = torch.zeros(b, h, w)
