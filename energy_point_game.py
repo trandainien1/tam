@@ -443,8 +443,9 @@ if __name__ == '__main__':
     scores = []
     p, r, f1 = [], [], []
     # iterator = tqdm(data_loader, total=len(data_loader))
+    iterator = tqdm(subset_loader, total=len(subset_loader))
     # for j, (img, annos) in enumerate(iterator):
-    for data in tqdm(subset_loader):
+    for data in iterator:
         # bboxes = []
         # for anno in annos:
         #     bboxes.append(parseXML(anno))
