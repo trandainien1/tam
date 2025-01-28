@@ -522,6 +522,8 @@ if __name__ == '__main__':
         state_dict = timm_model.state_dict()
         model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=1000)
         model.load_state_dict(state_dict, strict=True)
+        model = model.eval()
+        model = model.cuda()
     else:
         from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
         model = eval(args.arch)(pretrained=True).cuda()
