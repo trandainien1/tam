@@ -311,6 +311,8 @@ class InterpretTransformer(object):
         sal = F.interpolate(attrs[:, 0, 1:].reshape(-1, 1, self.img_size//16, self.img_size//16), scale_factor=16, mode='bilinear').cuda()
         return sal.reshape(-1, self.img_size, self.img_size).cpu().detach().numpy()
 
+
+
     
 if __name__ == '__main__':
     
