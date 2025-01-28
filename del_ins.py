@@ -747,7 +747,8 @@ if __name__ == '__main__':
                      'raw_attn',
                      'attribution', 
                      'better_agc',
-                     'agc'
+                     'better_agc_plus1',
+                     'agc',
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
