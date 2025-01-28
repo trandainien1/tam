@@ -424,4 +424,4 @@ if __name__ == '__main__':
         
     np.save(os.path.join('del_ins_results', args.method + '.npy'), scores)
     print('----------------------------------------------------------------')
-    print('Final:\nDeletion - {:.5f}\nInsertion - {:.5f}'.format(np.mean(scores['del']), np.mean(scores['ins'])))
+    print('Final - {}:\nDeletion - {:.5f}\nInsertion - {:.5f}'.format(args.method, np.mean(scores['del']), np.mean(scores['ins'])))
