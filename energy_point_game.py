@@ -249,6 +249,7 @@ def energy_point_game(bboxes_batch, saliency_map):
     recalls = []
     f1_scores = []
     
+    print('[DEBUG] bboxes patch shape: ', bboxes_batch.shape)
     for i in range(b):
         for bboxes in bboxes_batch:
             for bbox in bboxes:
