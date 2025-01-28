@@ -562,7 +562,10 @@ if __name__ == '__main__':
         
         model = vit_LRP(pretrained=True).cuda()
     
-    it = InterpretTransformer(model)
+    if args.method == 'better_agc':
+        it = BetterAGC(model)
+    else:
+        it = InterpretTransformer(model)
     print(f'explanation method: {args.method}')
     
     # Image preprocessing function
@@ -634,6 +637,13 @@ if __name__ == '__main__':
             Res = it.rollout(img.cuda())
         elif args.method == 'attribution':
             Res = it.attribution(img.cuda())
+        elif args.method == 'better_agc':
+            saliency_map = it(img.cuda()) #saliency_map.shape = [14, 14]
+            saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
+            if saliency_map.shape != img.shape:
+                saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
+            saliency_map = saliency_map.cpu().detach().numpy()
+            Res = saliency_map
         
             
         # threshold between FG and BG is the mean    
