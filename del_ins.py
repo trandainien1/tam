@@ -23,6 +23,9 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.datasets.imagenet import ImageNet
 
+import timm
+import AGC_methods.AGCAM.ViT_for_AGCAM as ViT_Ours
+
 # -------------------- datasets ---------------------
 datasets_dict = {
     'imagenet': {
@@ -341,15 +344,25 @@ if __name__ == '__main__':
             help='')
     
     args = parser.parse_args()
-    
+
+     # ---------------------------------   Load model  ------------------------------------    
+    MODEL = 'vit_base_patch16_224'
+
     if args.method in [
         'tam', 'raw_attn', 'rollout'
     ]:
         from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
         model = eval(args.arch)(pretrained=True).cuda()
+    elif 'agc' in args.method:
+        timm_model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
+        state_dict = timm_model.state_dict()
+        model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=1000)
+        model.load_state_dict(state_dict, strict=True)
     else:
         from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
         model = eval(args.arch)(pretrained=True).cuda()
+
+    # ---------------------------------   Load model  ------------------------------------
 
     if args.arch == 'vit_base_patch16_384':
         img_size = 384
@@ -371,7 +384,7 @@ if __name__ == '__main__':
     
     batch_size = args.batch_size
     num_samples = args.num_samples
-    
+
     # blur
     if args.blur:
         print("use blur insertion")
