@@ -782,7 +782,8 @@ if __name__ == '__main__':
                 'attribution', 
                 'raw_attn', 
                 'rollout',
-                'better_agc'
+                'better_agc',
+                'agc'
             ],
             help='')
     parser.add_argument('--batch_size', type=int,
