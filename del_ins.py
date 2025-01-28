@@ -442,7 +442,7 @@ class BetterAGC:
 
     def __call__(self, x, class_idx=None):
 
-        print('[DEBUG]', x.shape)
+        
         # Check that we get only one image
         assert x.dim() == 3 or (x.dim() == 4 and x.shape[0] == 1), "Only one image can be processed at a time"
 
