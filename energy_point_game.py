@@ -19,11 +19,16 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import pandas as pd
 
+from torchvision.datasets import ImageFolder
+from bs4 import BeautifulSoup
+import PIL
+from torch.utils.data import Subset
+
 class ImageNetBboxDataset(Dataset):
     def __init__(self, img_path, anno_path, transform, num_samples=1, seed=0):
         print(f'ramdon seed: {seed}, num_samples: {num_samples}')
         np.random.seed(seed)
-        print('[DEBUG1]: image path:', img_path)
+        
         imgs = glob.glob(os.path.join(img_path, '*.JPEG'))
         
         file_name = 'datasets/2000idx_ILSVRC2012.csv'
@@ -265,7 +270,67 @@ def energy_point_game(bboxes_batch, saliency_map):
 
     return precisions, recalls, f1_scores
 
+class ImageNetDataset_val(ImageFolder):
+    def __init__(self, root_dir, transforms=None):
+        self.img_dir = os.path.join(root_dir, "Data", "CLS-LOC", "val")
+        self.annotation_dir = os.path.join(root_dir, "Annotations", "CLS-LOC", "val")
+        self.classes = sorted(os.listdir(self.img_dir))
+        self.transforms = transforms
+        self.img_data = []
+        self.img_labels = []
 
+        for idx, cls in enumerate(self.classes):
+            # self.class_name.append(cls)
+            img_cls_dir = os.path.join(self.img_dir, cls)
+
+            for img in glob(os.path.join(img_cls_dir, '*.JPEG')):
+                self.img_data.append(img)
+                self.img_labels.append(idx)
+
+
+    def __getitem__(self, idx):
+        img_path, label = self.img_data[idx], self.img_labels[idx]
+        # print('[DEBUG]', img_path)
+        img = PIL.Image.open(img_path).convert('RGB')
+        # img.show()
+        width, height = img.size
+        img_name = img_path.split('/')[-1].split('.')[0]
+        anno_path = os.path.join(self.annotation_dir, img_name+".xml")
+        with open(anno_path, 'r') as f:
+            file = f.read()
+        soup = BeautifulSoup(file, 'html.parser')
+        if self.transforms:
+            img = self.transforms(img)
+        objects = soup.findAll('object')
+        
+        bnd_box = torch.tensor([])
+
+        for object in objects:
+            xmin = int(object.bndbox.xmin.text)
+            ymin = int(object.bndbox.ymin.text)
+            xmax = int(object.bndbox.xmax.text)
+            ymax = int(object.bndbox.ymax.text)
+            xmin = int(xmin/width*224)
+            ymin = int(ymin/height*224)
+            xmax = int(xmax/width*224)
+            ymax = int(ymax/height*224)
+            if bnd_box.dim()==1:
+                bnd_box = torch.tensor((xmin, ymin, xmax, ymax)).unsqueeze(0)
+            else:
+                bnd_box = torch.cat((bnd_box, torch.tensor((xmin, ymin, xmax, ymax)).unsqueeze(0)), dim=0)
+        # print(bnd_box.shape)
+        sample = {
+            'image': img, 
+            'label': label, 
+            'filename': img_name, 
+            'num_objects': len(objects), 
+            'bnd_box': bnd_box, 
+            'img_path': img_path
+            }
+        return sample
+
+    def __len__(self):
+        return len(self.img_data)
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='insertion and deletion evaluation')
@@ -299,6 +364,8 @@ if __name__ == '__main__':
         from baselines.ViT.ViT_new import vit_base_patch16_224
 
         model = vit_base_patch16_224(pretrained=True).cuda()
+    elif 'agc' in args.method:
+        pass
     else:
         from baselines.ViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
         
@@ -308,40 +375,65 @@ if __name__ == '__main__':
     print(f'explanation method: {args.method}')
     
     # Image preprocessing function
-    preprocess = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5],
-                             std=[0.5, 0.5, 0.5]),
+    # preprocess = transforms.Compose([
+    #     transforms.Resize((224, 224)),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(mean=[0.5, 0.5, 0.5],
+    #                          std=[0.5, 0.5, 0.5]),
+    # ])
+    transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     
     batch_size = args.batch_size
     num_samples = args.num_samples
     
-    dataset = ImageNetBboxDataset(
-        img_path='/kaggle/input/ilsvrc/ILSVRC/Data',
-        anno_path='/kaggle/input/ilsvrc/ILSVRC/Annotations',
-        transform=preprocess,
-        num_samples=args.num_samples,
-        seed=args.seed
+    # dataset = ImageNetBboxDataset(
+    #     img_path='/kaggle/input/ilsvrc/ILSVRC/Data',
+    #     anno_path='/kaggle/input/ilsvrc/ILSVRC/Annotations',
+    #     transform=preprocess,
+    #     num_samples=args.num_samples,
+    #     seed=args.seed
+    # )
+
+    validset = ImageNetDataset_val(
+    # root_dir='./ILSVRC',
+    root_dir='/kaggle/input/ilsvrc/ILSVRC',
+    transforms=transform,
     )
+
+    validloader = DataLoader(
+        dataset = validset,
+        batch_size=1,
+        shuffle = False,
+    )
+
+    subset_indices = pd.read_csv('/kaggle/working/better_agc_ubuntu/2000idx_ILSVRC2012.csv', header=None)[0].to_numpy()
+    subset = Subset(validloader.dataset, subset_indices)
+    subset_loader = torch.utils.data.DataLoader(subset, batch_size=1, shuffle=False)
     
     # Load batch of images
-    data_loader = torch.utils.data.DataLoader(
-        dataset, 
-        batch_size=batch_size, 
-        shuffle=False,
-        num_workers=8
-    )
+    # data_loader = torch.utils.data.DataLoader(
+    #     dataset, 
+    #     batch_size=batch_size, 
+    #     shuffle=False,
+    #     num_workers=8
+    # )
     
     scores = []
     p, r, f1 = [], [], []
-    iterator = tqdm(data_loader, total=len(data_loader))
-    for j, (img, annos) in enumerate(iterator):
-        bboxes = []
-        for anno in annos:
-            bboxes.append(parseXML(anno))
-        
+    # iterator = tqdm(data_loader, total=len(data_loader))
+    # for j, (img, annos) in enumerate(iterator):
+    for data in tqdm(subset_loader):
+        # bboxes = []
+        # for anno in annos:
+        #     bboxes.append(parseXML(anno))
+        img = data['image'].to('cuda')
+        bboxes = data['bnd_box'].to('cuda').squeeze(0)
+
         if args.method == 'tam':
             Res = it.transition_attention_maps(img.cuda(), start_layer=4)
         elif args.method == 'raw_attn':
