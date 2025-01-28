@@ -313,8 +313,8 @@ if __name__ == '__main__':
     num_samples = args.num_samples
     
     dataset = ImageNetBboxDataset(
-        img_path='/root/datasets/ImageNet/ILSVRC2012_val',
-        anno_path='/root/datasets/ImageNet/val',
+        img_path='/kaggle/input/ilsvrc/ILSVRC/Data',
+        anno_path='/kaggle/input/ilsvrc/ILSVRC/Annotations',
         transform=preprocess,
         num_samples=args.num_samples,
         seed=args.seed
