@@ -23,6 +23,7 @@ class ImageNetBboxDataset(Dataset):
     def __init__(self, img_path, anno_path, transform, num_samples=1, seed=0):
         print(f'ramdon seed: {seed}, num_samples: {num_samples}')
         np.random.seed(seed)
+        print('[DEBUG1]: image path:', img_path)
         imgs = glob.glob(os.path.join(img_path, '*.JPEG'))
         
         file_name = 'datasets/2000idx_ILSVRC2012.csv'
