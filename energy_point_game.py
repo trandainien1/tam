@@ -598,6 +598,7 @@ if __name__ == '__main__':
     root_dir='/kaggle/input/ilsvrc/ILSVRC',
     transforms=transform,
     )
+    print('[DEBUG]', validset.shape)
     upsampling_fn = Resize(validset[0][0].shape[-2:], antialias=True)
 
     validloader = DataLoader(
