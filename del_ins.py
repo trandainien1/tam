@@ -27,7 +27,7 @@ import timm
 import AGC_methods.AGCAM.ViT_for_AGCAM as ViT_Ours
 from einops.layers.torch import Reduce, Rearrange
 from torchvision.transforms import Resize
-
+from fast_pytorch_kmeans import KMeans
 # -------------------- datasets ---------------------
 datasets_dict = {
     'imagenet': {

@@ -17,3 +17,4 @@ captum
 wget
 ftfy
 regex
+fast-pytorch-kmeans==0.1.6
