@@ -26,6 +26,7 @@ from torchvision.datasets.imagenet import ImageNet
 import timm
 import AGC_methods.AGCAM.ViT_for_AGCAM as ViT_Ours
 from einops.layers.torch import Reduce, Rearrange
+from torchvision.transforms import Resize
 
 # -------------------- datasets ---------------------
 datasets_dict = {
@@ -475,7 +476,8 @@ class BetterAGC:
         # print("After generate saliency maps: ")
         # print(torch.cuda.memory_allocated()/1024**2)
         # print()
-        return saliency_map.reshape(-1, 224, 224).cpu().detach().numpy()
+        
+        return saliency_map
 
 if __name__ == '__main__':
     
@@ -566,6 +568,7 @@ if __name__ == '__main__':
     # dataset = datasets.ImageFolder('/root/datasets/ImageNet/val', preprocess)
 
     dataset, n_output = get_dataset(name='imagenet', root='.')
+    upsampling_fn = Resize(dataset[0][0].shape[-2:], antialias=True)
 
     np.random.seed(0)
     # max_index = np.random.randint(num_samples, len(dataset))
@@ -591,7 +594,11 @@ if __name__ == '__main__':
         elif args.method == 'attribution':
             exp = it.attribution(img.cuda())
         elif args.method == 'better_agc':
-            exp = it(img)
+            saliency_map = it(img.unsqueeze(0)) #saliency_map.shape = [14, 14]
+            saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
+            if saliency_map.shape != img.shape:
+                saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
+            exp = saliency_map
 
         # Evaluate deletion
         h = deletion.evaluate(img, exp)
