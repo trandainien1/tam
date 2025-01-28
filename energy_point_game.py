@@ -283,7 +283,6 @@ class ImageNetDataset_val(ImageFolder):
         for idx, cls in enumerate(self.classes):
             # self.class_name.append(cls)
             img_cls_dir = os.path.join(self.img_dir, cls)
-            print('[DEBUG]', img_cls_dir)
             for img in glob(os.path.join(img_cls_dir, '*.JPEG')):
                 self.img_data.append(img)
                 self.img_labels.append(idx)
