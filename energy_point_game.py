@@ -252,6 +252,7 @@ def energy_point_game(bboxes_batch, saliency_map):
     for i in range(b):
         for bboxes in bboxes_batch:
             for bbox in bboxes:
+                print('[DEBUG] bbox shape: ', bbox.shape)
                 x1, y1, x2, y2 = map(lambda x: int(x * 224), bbox)
                 gt[i, y1:y2, x1:x2] = 1
 
