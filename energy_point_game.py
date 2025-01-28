@@ -238,6 +238,18 @@ class InterpretTransformer(object):
 bbox (list): upper left and lower right coordinates of object bounding box
 saliency_map (array): explanation map, ignore the channel
 '''
+def box_to_seg(box_cor):
+    segmask = torch.zeros((224, 224))
+    if box_cor.dim()!=1:
+        n, _ = box_cor.shape
+        for i in range(n):
+            xmin = box_cor[i][0]
+            ymin = box_cor[i][1]
+            xmax = box_cor[i][2]
+            ymax = box_cor[i][3]
+            segmask[ymin:ymax+1, xmin:xmax+1]=1
+    
+    return segmask
 
 def energy_point_game(bboxes_batch, saliency_map):
   
@@ -249,13 +261,16 @@ def energy_point_game(bboxes_batch, saliency_map):
     recalls = []
     f1_scores = []
     
+
+
     print('[DEBUG] bboxes patch shape: ', bboxes_batch.shape)
     for i in range(b):
-        for bboxes in bboxes_batch:
-            for bbox in bboxes:
-                print('[DEBUG] bbox shape: ', bbox.shape)
-                x1, y1, x2, y2 = map(lambda x: int(x * 224), bbox)
-                gt[i, y1:y2, x1:x2] = 1
+        # for bboxes in bboxes_batch:
+        #     for bbox in bboxes:
+        #         print('[DEBUG] bbox shape: ', bbox.shape)
+        #         x1, y1, x2, y2 = map(lambda x: int(x * 224), bbox)
+        #         gt[i, y1:y2, x1:x2] = 1
+        gt = box_to_seg(bboxes_batch).to('cuda')
 
         TP = (saliency_map * gt).sum()  
 
