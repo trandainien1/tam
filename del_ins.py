@@ -639,6 +639,8 @@ if __name__ == '__main__':
 
     if args.method == 'better_agc':
         it = BetterAGC(model)
+    elif args.method == 'agc'
+        it = AGCAM(model)
     else:
         it = InterpretTransformer(model, img_size)
     
