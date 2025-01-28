@@ -459,7 +459,7 @@ class BetterAGC:
         # Define the class to explain. If not explicit, use the class predicted by the model
         if class_idx is None:
             class_idx = predicted_class
-            print("class idx", class_idx)
+            # print("class idx", class_idx)
 
         # Generate the saliency map for image x and class_idx
         scores = self.generate_scores(
