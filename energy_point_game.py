@@ -598,8 +598,6 @@ if __name__ == '__main__':
     root_dir='/kaggle/input/ilsvrc/ILSVRC',
     transforms=transform,
     )
-    print('[DEBUG]', validset.shape)
-    upsampling_fn = Resize(validset[0][0].shape[-2:], antialias=True)
 
     validloader = DataLoader(
         dataset = validset,
@@ -642,8 +640,14 @@ if __name__ == '__main__':
         elif args.method == 'better_agc':
             saliency_map = it(img.cuda()) #saliency_map.shape = [14, 14]
             saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
-            if saliency_map.shape != img.shape:
-                saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
+            saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 1, 14, 14]
+            print('[DEBUG1]', saliency_map.shape)
+            
+            # Reshape the mask to have the same size with the original input image (224 x 224)
+            upsample = torch.nn.Upsample(224, mode = 'bilinear', align_corners=False)
+            saliency_map = upsample(saliency_map)
+            print('[DEBUG2]', saliency_map.shape)
+            
             saliency_map = saliency_map.cpu().detach().numpy()
             Res = saliency_map
         
