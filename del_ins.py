@@ -323,7 +323,7 @@ if __name__ == '__main__':
             choices=['tam',
                      'rollout',
                      'raw_attn',
-                     'attribution'],
+                     'attribution', 'better_agc'],
             help='')
     parser.add_argument('--batch_size', type=int,
                         default=16,
