@@ -11,7 +11,7 @@ from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 import argparse
 import numpy as np
 import os
-import glob
+from glob import glob
 import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
