@@ -590,7 +590,7 @@ if __name__ == '__main__':
         elif args.method == 'attribution':
             exp = it.attribution(img.cuda())
         elif args.method == 'better_agc':
-            exp = it(img.cuda())
+            exp = it(img)
 
         # Evaluate deletion
         h = deletion.evaluate(img, exp)
