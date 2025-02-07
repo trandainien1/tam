@@ -28,6 +28,9 @@ import AGC_methods.AGCAM.ViT_for_AGCAM as ViT_Ours
 from einops.layers.torch import Reduce, Rearrange
 from torchvision.transforms import Resize
 from fast_pytorch_kmeans import KMeans
+
+from AGC_methods.LRP.ViT_explanation_generator import LRP
+
 # -------------------- datasets ---------------------
 datasets_dict = {
     'imagenet': {
@@ -1046,6 +1049,7 @@ if __name__ == '__main__':
     ]:
         from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
         model = eval(args.arch)(pretrained=True).cuda()
+        
     elif 'agc' in args.method:
         timm_model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
         state_dict = timm_model.state_dict()
@@ -1076,6 +1080,8 @@ if __name__ == '__main__':
         it = AGCAM(model)
     elif args.method == 'better_agc_cluster':
         it = BetterAGC_cluster(model)
+    elif args.method == 'chefer1':
+        it = LRP(model, device='cuda')
     else:
         it = InterpretTransformer(model, img_size)
     
@@ -1129,9 +1135,11 @@ if __name__ == '__main__':
             exp = it.raw_attn(img.cuda()) 
         elif args.method == 'rollout':
             exp = it.rollout(img.cuda()) 
+        # elif args.method == 'chefer1':
+            # _, exp = it.generate(img.cuda())
         elif args.method == 'attribution':
             exp = it.attribution(img.cuda())
-        elif 'agc' in args.method:
+        elif 'agc' in args.method or args.method == 'chefer1':
             saliency_map = it(img.cuda()) #saliency_map.shape = [14, 14]
             saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
             if saliency_map.shape != img.shape:
