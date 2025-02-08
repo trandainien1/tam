@@ -1019,6 +1019,7 @@ if __name__ == '__main__':
                      'better_agc_plus1',
                      'better_agc_cluster',
                      'agc',
+                     'chefer1',
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
