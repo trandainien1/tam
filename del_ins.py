@@ -1140,7 +1140,15 @@ if __name__ == '__main__':
             # _, exp = it.generate(img.cuda())
         elif args.method == 'attribution':
             exp = it.attribution(img.cuda())
-        elif 'agc' in args.method or args.method == 'chefer1':
+        elif args.method == 'chefer1':
+            saliency_map = it.generate(img.cuda()) #saliency_map.shape = [14, 14]
+            saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
+            if saliency_map.shape != img.shape:
+                saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
+            saliency_map = saliency_map.cpu().detach().numpy()
+            exp = saliency_map
+
+        elif 'agc' in args.method:
             saliency_map = it(img.cuda()) #saliency_map.shape = [14, 14]
             saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
             if saliency_map.shape != img.shape:
