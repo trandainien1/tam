@@ -577,7 +577,7 @@ class AGCAM:
         return ours_heatmap
 
 class BetterAGC_plus1:
-    def __init__(self, model, attention_matrix_layer = 'before_softmax', attention_grad_layer = 'after_softmax', head_fusion='sum', layer_fusion='sum', plus_number=1):
+    def __init__(self, model, attention_matrix_layer = 'before_softmax', attention_grad_layer = 'after_softmax', head_fusion='sum', layer_fusion='sum', plus_number=1, softmax_nor = False):
         """
         Args:
             model (nn.Module): the Vision Transformer model to be explained
@@ -594,6 +594,7 @@ class BetterAGC_plus1:
         self.attn_matrix = []
         self.grad_attn = []
         self.plus_number = plus_number
+        self.softmax_nor = softmax_nor
 
         for layer_num, (name, module) in enumerate(self.model.named_modules()):
             if attention_matrix_layer in name:
@@ -683,7 +684,10 @@ class BetterAGC_plus1:
             # print(torch.cuda.memory_allocated()/1024**2)
     
             agc_scores = output_mask[:, prediction.item()] - output_truth[0, prediction.item()]
-            agc_scores = torch.sigmoid(agc_scores)
+            if self.softmax_nor:
+                agc_scores = torch.softmax(agc_scores)
+            else:
+                agc_scores = torch.sigmoid(agc_scores)
             agc_scores += self.plus_number
 
             agc_scores = agc_scores.reshape(head_cams[0].shape[0], head_cams[0].shape[1])
@@ -1019,6 +1023,7 @@ if __name__ == '__main__':
                      'better_agc',
                      'better_agc_plus1',
                      'better_agc_plus5',
+                     'better_agc_softmax',
                      'better_agc_cluster',
                      'agc',
                      'chefer1',
@@ -1081,6 +1086,8 @@ if __name__ == '__main__':
         it = BetterAGC_plus1(model)
     elif args.method == 'better_agc_plus5':
         it = BetterAGC_plus1(model, plus_number=5)
+    elif args.method == 'better_agc_softmax':
+        it = BetterAGC_plus1(model, softmax_nor=True) 
     elif args.method == 'agc':
         it = AGCAM(model)
     elif args.method == 'better_agc_cluster':
