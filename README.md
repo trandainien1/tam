@@ -9,6 +9,10 @@ This github is used for Insertion/Deletion evaluation of ScoreAGC
 
 Our ScoreAGC is implemented in del_ins.py
 
+## To run this github?
+
+Please refer to this [link](https://github.com/trandainien1/ScoreAGC.git)
+
 ## Github references
 
 - Special thanks to the following githubs to support our evaluations and references. 
