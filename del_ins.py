@@ -685,7 +685,8 @@ class BetterAGC_plus1:
     
             agc_scores = output_mask[:, prediction.item()] - output_truth[0, prediction.item()]
             if self.softmax_nor:
-                agc_scores = torch.softmax(agc_scores)
+                agc_scores = F.softmax(agc_scores)
+
             else:
                 agc_scores = torch.sigmoid(agc_scores)
             agc_scores += self.plus_number
