@@ -577,7 +577,7 @@ class AGCAM:
         return ours_heatmap
 
 class BetterAGC_plus1:
-    def __init__(self, model, attention_matrix_layer = 'before_softmax', attention_grad_layer = 'after_softmax', head_fusion='sum', layer_fusion='sum'):
+    def __init__(self, model, attention_matrix_layer = 'before_softmax', attention_grad_layer = 'after_softmax', head_fusion='sum', layer_fusion='sum', plus_number=1):
         """
         Args:
             model (nn.Module): the Vision Transformer model to be explained
@@ -593,6 +593,7 @@ class BetterAGC_plus1:
         self.layer_fusion = layer_fusion
         self.attn_matrix = []
         self.grad_attn = []
+        self.plus_number = plus_number
 
         for layer_num, (name, module) in enumerate(self.model.named_modules()):
             if attention_matrix_layer in name:
@@ -683,7 +684,7 @@ class BetterAGC_plus1:
     
             agc_scores = output_mask[:, prediction.item()] - output_truth[0, prediction.item()]
             agc_scores = torch.sigmoid(agc_scores)
-            agc_scores += 1
+            agc_scores += self.plus_number
 
             agc_scores = agc_scores.reshape(head_cams[0].shape[0], head_cams[0].shape[1])
 
@@ -1017,6 +1018,7 @@ if __name__ == '__main__':
                      'attribution', 
                      'better_agc',
                      'better_agc_plus1',
+                     'better_agc_plus5',
                      'better_agc_cluster',
                      'agc',
                      'chefer1',
@@ -1077,6 +1079,8 @@ if __name__ == '__main__':
         it = BetterAGC(model)
     elif args.method == 'better_agc_plus1':
         it = BetterAGC_plus1(model)
+    elif args.method == 'better_agc_plus5':
+        it = BetterAGC_plus1(model, plus_number=5)
     elif args.method == 'agc':
         it = AGCAM(model)
     elif args.method == 'better_agc_cluster':
