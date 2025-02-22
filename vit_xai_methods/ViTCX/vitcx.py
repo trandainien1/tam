@@ -54,7 +54,7 @@ class ViTCXWrapper:
             del model
             return prediction, saliency
     def generate(self, x, target=None):
-        target = target.to('cpu')
+        # target = target.to('cpu')
         with torch.enable_grad():
             prediction, saliency_map = self.exec_method(x, class_idx=target)
             return prediction, saliency_map.detach().cpu()
