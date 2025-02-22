@@ -1205,7 +1205,6 @@ if __name__ == '__main__':
             exp = saliency_map
         elif args.method == 'vitcx':
             saliency_map = it.generate(img.cuda()).unsqueeze(0) #saliency_map.shape = [14, 14]
-            print('[DEBUG]: ', saliency_map.shape)
             if saliency_map.shape != img.shape:
                 saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
             saliency_map = saliency_map.cpu().detach().numpy()
