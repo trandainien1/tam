@@ -178,10 +178,23 @@ class InterpretTransformer(object):
         self.img_size=img_size
     
     def transition_attention_maps(self, input, index=None, start_layer=0, steps=20, with_integral=True, first_state=False):
+        
+        def vit_base_patch16_224(pretrained=True, model_name="vit_base_patch16_224", pretrained_cfg='orig_in21k_ft_in1k', **kwargs):
+            model = VisionTransformer(patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True, **kwargs)
+
+            cfg = _cfg(url=vit_cfgs[model_name].cfgs[pretrained_cfg].url, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+
+            model.default_cfg = cfg
+
+            if pretrained:
+                load_pretrained(model, num_classes=model.num_classes, in_chans=kwargs.get('in_chans', 3), filter_fn=_conv_filter)
+        
+            return model.cuda()
+        
         b = input.shape[0]
         self.model = vit_base_patch16_224()
         self.model.eval()
-        self.model.to('cuda')
+
         output = self.model(input, register_hook=True)
         if index == None:
             index = np.argmax(output.cpu().data.numpy(), axis=-1)
