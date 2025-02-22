@@ -1080,42 +1080,23 @@ if __name__ == '__main__':
     #     model = eval(args.arch)(pretrained=True).cuda()
 
 
-def attn_method_model():
-    state_dict = model_zoo.load_url('https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_base_p16_224-80ecf9dd.pth', progress=True, map_location='cuda')
-    model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=class_num).to('cuda')
-    model.load_state_dict(state_dict, strict=True)
-    model.eval()
+    def attn_method_model():
+        state_dict = model_zoo.load_url('https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_base_p16_224-80ecf9dd.pth', progress=True, map_location='cuda')
+        model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=class_num).to('cuda')
+        model.load_state_dict(state_dict, strict=True)
+        model.eval()
+        model = model.to('cuda')
+        return model
+
+    model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
+    model = model.eval()
     model = model.to('cuda')
-    return model
 
-model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
-model = model.eval()
-model = model.to('cuda')
-
-if args.method=="agcam":
-    model = attn_method_model()
-    method = AGCAM(model)
-    save_name +="_agcam"
-elif args.method=="chefer1":
-    method = LRP(model, device=device)
-    save_name+="_chefer1"
-elif args.method=="rollout":
-    model = attn_method_model()
-    method = VITAttentionRollout(model, device=device)
-    save_name+='_rollout'
-elif args.method == 'tis':
-    method = TISWrapper(model=model)
-elif args.method == 'vitcx':
-    method = ViTCXWrapper(model=model)
-elif args.method == 'btt':
-    method = BTTWrapper(model=model)
-elif args.method == 'bth':
-    method = BTHWrapper(model=model)
-elif args.method == 'tam':
-    method = TAMWrapper(model=model)
-elif args.method == 'chefer2':
-    method = Chefer2Wrapper(model=model)
-
+    if args.method=="agcam":
+        model = attn_method_model()
+    elif args.method=="rollout":
+        model = attn_method_model()
+ 
     # ---------------------------------   Load model  ------------------------------------
 
     if args.arch == 'vit_base_patch16_384':
