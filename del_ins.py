@@ -35,8 +35,8 @@ from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.ViTCX.vitcx import ViTCXWrapper
 # from vit_xai_methods.BT.bt import BTTWrapper, BTHWrapper
-from vit_xai_methods.TAM.tam import TAMWrapper
-# from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
+
+from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
 
 # -------------------- datasets ---------------------
 datasets_dict = {
@@ -1037,7 +1037,7 @@ if __name__ == '__main__':
                      'chefer1',
                      'tis',
                      'vitcx',
-                     'tam',
+                     
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
@@ -1131,8 +1131,7 @@ if __name__ == '__main__':
         it = TISWrapper(model)
     elif args.method == 'vitcx':
         it = ViTCXWrapper(model)
-    elif args.method == 'tam':
-        it = TAMWrapper(model)
+
     else:
         it = InterpretTransformer(model, img_size)
     
@@ -1199,7 +1198,7 @@ if __name__ == '__main__':
                 saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
             saliency_map = saliency_map.cpu().detach().numpy()
             exp = saliency_map
-        elif args.method in ['tis', 'tam']:
+        elif args.method in ['tis']:
             saliency_map = it.generate(img.cuda()) #saliency_map.shape = [14, 14]
             saliency_map = saliency_map.reshape(1, 1, 14, 14) 
             if saliency_map.shape != img.shape:
