@@ -33,7 +33,7 @@ class TIS:
         """
 
         # Check that model is a ViT
-        # assert isinstance(model, VisionVIT) or isinstance(model, TimmVIT), "Transformer architecture not recognised"
+        assert isinstance(model, VisionVIT) or isinstance(model, TimmVIT), "Transformer architecture not recognised"
 
         # Save model
         self.model = model
@@ -106,13 +106,13 @@ class TIS:
             # Store activations into the encoder_activations list
             self.encoder_activations.append(output.detach())
 
-        # if isinstance(self.model, VisionVIT):
-        #     layers = self.model.encoder.layers
-        # elif isinstance(self.model, TimmVIT):
-        #     layers = self.model.blocks
-        # else:
-        #     print("Model not recognised")
-        #     exit(1)
+        if isinstance(self.model, VisionVIT):
+            layers = self.model.encoder.layers
+        elif isinstance(self.model, TimmVIT):
+            layers = self.model.blocks
+        else:
+            print("Model not recognised")
+            exit(1)
 
         # Attach a forward hook to each transformer block
         for layer in layers:

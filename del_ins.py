@@ -31,6 +31,12 @@ from fast_pytorch_kmeans import KMeans
 
 from AGC_methods.LRP.ViT_explanation_generator import LRP
 from vit_xai_methods.TIS.tis import TISWrapper
+#methods
+from vit_xai_methods.TIS.tis import TISWrapper
+# from vit_xai_methods.ViTCX.vitcx import ViTCXWrapper
+# from vit_xai_methods.BT.bt import BTTWrapper, BTHWrapper
+# from vit_xai_methods.TAM.tam import TAMWrapper
+# from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
 
 # -------------------- datasets ---------------------
 datasets_dict = {
@@ -1053,24 +1059,62 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
      # ---------------------------------   Load model  ------------------------------------    
-    MODEL = 'vit_base_patch16_224'
+    # Original
+    # MODEL = 'vit_base_patch16_224'
 
-    if args.method in [
-        'tam', 'raw_attn', 'rollout'
-    ]:
-        from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
-        model = eval(args.arch)(pretrained=True).cuda()
+    # if args.method in [
+    #     'tam', 'raw_attn', 'rollout'
+    # ]:
+    #     from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
+    #     model = eval(args.arch)(pretrained=True).cuda()
         
-    elif 'agc' in args.method:
-        timm_model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
-        state_dict = timm_model.state_dict()
-        model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=1000)
-        model.load_state_dict(state_dict, strict=True)
-        model = model.eval()
-        model = model.cuda()
-    else:
-        from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
-        model = eval(args.arch)(pretrained=True).cuda()
+    # elif 'agc' in args.method:
+    #     timm_model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
+    #     state_dict = timm_model.state_dict()
+    #     model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=1000)
+    #     model.load_state_dict(state_dict, strict=True)
+    #     model = model.eval()
+    #     model = model.cuda()
+    # else:
+    #     from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
+    #     model = eval(args.arch)(pretrained=True).cuda()
+
+
+def attn_method_model():
+    state_dict = model_zoo.load_url('https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_base_p16_224-80ecf9dd.pth', progress=True, map_location='cuda')
+    model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=class_num).to('cuda')
+    model.load_state_dict(state_dict, strict=True)
+    model.eval()
+    model = model.to('cuda')
+    return model
+
+model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
+model = model.eval()
+model = model.to('cuda')
+
+if args.method=="agcam":
+    model = attn_method_model()
+    method = AGCAM(model)
+    save_name +="_agcam"
+elif args.method=="chefer1":
+    method = LRP(model, device=device)
+    save_name+="_chefer1"
+elif args.method=="rollout":
+    model = attn_method_model()
+    method = VITAttentionRollout(model, device=device)
+    save_name+='_rollout'
+elif args.method == 'tis':
+    method = TISWrapper(model=model)
+elif args.method == 'vitcx':
+    method = ViTCXWrapper(model=model)
+elif args.method == 'btt':
+    method = BTTWrapper(model=model)
+elif args.method == 'bth':
+    method = BTHWrapper(model=model)
+elif args.method == 'tam':
+    method = TAMWrapper(model=model)
+elif args.method == 'chefer2':
+    method = Chefer2Wrapper(model=model)
 
     # ---------------------------------   Load model  ------------------------------------
 
