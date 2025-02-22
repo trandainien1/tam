@@ -85,4 +85,4 @@ class Chefer2Wrapper():
             for block in self.model.blocks:
                 block.attn.attn_gradients = None
                 block.attn.attention_maps = None
-            return prediction[0], saliency_map.reshape(14, 14)
+            return saliency_map.reshape(14, 14)
