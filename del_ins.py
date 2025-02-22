@@ -38,6 +38,9 @@ from vit_xai_methods.ViTCX.vitcx import ViTCXWrapper
 
 from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
 
+MODEL = 'vit_base_patch16_224'
+DEVICE = 'cuda'
+device = 'cuda'
 # -------------------- datasets ---------------------
 datasets_dict = {
     'imagenet': {
