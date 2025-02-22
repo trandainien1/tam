@@ -1096,7 +1096,10 @@ if __name__ == '__main__':
         model = attn_method_model()
     elif args.method=="rollout":
         model = attn_method_model()
- 
+    elif args.method == 'chefer1':
+        from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
+        model = eval(args.arch)(pretrained=True).cuda()
+
     # ---------------------------------   Load model  ------------------------------------
 
     if args.arch == 'vit_base_patch16_384':
