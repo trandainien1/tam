@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from torch.utils.data.sampler import RandomSampler, SubsetRandomSampler
 from torchvision import transforms, datasets
 from PIL import Image
-
+import torch.utils.model_zoo as model_zoo
 import argparse
 
 
