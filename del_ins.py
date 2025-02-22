@@ -34,7 +34,7 @@ from vit_xai_methods.TIS.tis import TISWrapper
 #methods
 from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.ViTCX.vitcx import ViTCXWrapper
-# from vit_xai_methods.BT.bt import BTTWrapper, BTHWrapper
+from vit_xai_methods.BT.bt import BTTWrapper, BTHWrapper
 
 from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
 
@@ -1042,7 +1042,9 @@ if __name__ == '__main__':
                      'chefer1',
                      'tis',
                      'vitcx',
-                     'chefer2'
+                     'chefer2',
+                     'btt',
+                     'bth',
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
@@ -1139,7 +1141,10 @@ if __name__ == '__main__':
         it = ViTCXWrapper(model)
     elif args.method == 'chefer2':
         it = Chefer2Wrapper(model)
-
+    elif args.method == 'btt':
+        it = BTTWrapper(model)
+    elif args.method == 'bth':
+        it = BTHWrapper(model)
     else:
         it = InterpretTransformer(model, img_size)
     
