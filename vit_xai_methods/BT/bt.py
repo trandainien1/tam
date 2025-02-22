@@ -44,7 +44,7 @@ class BTHWrapper(BTWrapperCommon):
             prediction, saliency_map = self.method.generate_ours(x,
                                                      index=target,
                                                      start_layer=self.start_layer)
-            return prediction[0], saliency_map.reshape(14, 14)
+            return saliency_map.reshape(14, 14)
 
 class BTTWrapper(BTWrapperCommon):
     def __init__(self, model, start_layer=1, **kwargs):
@@ -61,6 +61,6 @@ class BTTWrapper(BTWrapperCommon):
             prediction, saliency_map = self.method.generate_ours_c(x,
                                                        index=target,
                                                        start_layer=self.start_layer)
-            return prediction[0], saliency_map.reshape(14, 14)
+            return saliency_map.reshape(14, 14)
 
 
