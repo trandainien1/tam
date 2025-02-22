@@ -42,6 +42,7 @@ MODEL = 'vit_base_patch16_224'
 DEVICE = 'cuda'
 device = 'cuda'
 class_num = 1000
+
 # -------------------- datasets ---------------------
 datasets_dict = {
     'imagenet': {
@@ -1101,7 +1102,8 @@ if __name__ == '__main__':
     if args.method=="agcam":
         model = attn_method_model()
     elif args.method in ["rollout", "tam"]:
-        model = attn_method_model()
+        from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
+        model = eval(args.arch)(pretrained=True).cuda()
     elif args.method == 'chefer1':
         from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
         model = eval(args.arch)(pretrained=True).cuda()
