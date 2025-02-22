@@ -1211,7 +1211,7 @@ if __name__ == '__main__':
                 saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
             saliency_map = saliency_map.cpu().detach().numpy()
             exp = saliency_map
-        elif args.method in ['tis', 'chefer2']:
+        elif args.method in ['tis', 'chefer2', 'btt', 'bth']:
             saliency_map = it.generate(img.cuda()) #saliency_map.shape = [14, 14]
             saliency_map = saliency_map.reshape(1, 1, 14, 14) 
             if saliency_map.shape != img.shape:
