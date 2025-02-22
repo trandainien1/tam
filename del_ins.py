@@ -1196,10 +1196,16 @@ if __name__ == '__main__':
                 saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
             saliency_map = saliency_map.cpu().detach().numpy()
             exp = saliency_map
-        elif args.method in ['tis', 'vitcx']:
+        elif args.method in ['tis']:
             saliency_map = it.generate(img.cuda()) #saliency_map.shape = [14, 14]
-            print('[DEBUG]: ', saliency_map.shape)
             saliency_map = saliency_map.reshape(1, 1, 14, 14) 
+            if saliency_map.shape != img.shape:
+                saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
+            saliency_map = saliency_map.cpu().detach().numpy()
+            exp = saliency_map
+        elif args.method == 'vitcx':
+            saliency_map = it.generate(img.cuda()).unsqueeze(0) #saliency_map.shape = [14, 14]
+            print('[DEBUG]: ', saliency_map.shape)
             if saliency_map.shape != img.shape:
                 saliency_map = upsampling_fn(saliency_map) #saliency_map.shape = [1, 224, 224]
             saliency_map = saliency_map.cpu().detach().numpy()
