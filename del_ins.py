@@ -30,6 +30,7 @@ from torchvision.transforms import Resize
 from fast_pytorch_kmeans import KMeans
 
 from AGC_methods.LRP.ViT_explanation_generator import LRP
+from vit_xai_methods.TIS.tis import TISWrapper
 
 # -------------------- datasets ---------------------
 datasets_dict = {
@@ -1028,6 +1029,7 @@ if __name__ == '__main__':
                      'better_agc_cluster',
                      'agc',
                      'chefer1',
+                     'tis',
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
@@ -1095,6 +1097,8 @@ if __name__ == '__main__':
         it = BetterAGC_cluster(model)
     elif args.method == 'chefer1':
         it = LRP(model, device='cuda')
+    elif args.method == 'tis':
+        it = TISWrapper(model)
     else:
         it = InterpretTransformer(model, img_size)
     
@@ -1152,7 +1156,7 @@ if __name__ == '__main__':
             # _, exp = it.generate(img.cuda())
         elif args.method == 'attribution':
             exp = it.attribution(img.cuda())
-        elif args.method == 'chefer1':
+        elif args.method in ['chefer1', 'tis']:
             saliency_map = it.generate(img.cuda()) #saliency_map.shape = [14, 14]
             # saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
             if saliency_map.shape != img.shape:
