@@ -179,6 +179,9 @@ class InterpretTransformer(object):
     
     def transition_attention_maps(self, input, index=None, start_layer=0, steps=20, with_integral=True, first_state=False):
         b = input.shape[0]
+        self.model = vit_base_patch16_224()
+        self.model.eval()
+        self.model.to('cuda')
         output = self.model(input, register_hook=True)
         if index == None:
             index = np.argmax(output.cpu().data.numpy(), axis=-1)
