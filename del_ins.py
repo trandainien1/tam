@@ -1099,7 +1099,7 @@ if __name__ == '__main__':
     model = model.eval()
     model = model.to('cuda')
 
-    if args.method=="agcam":
+    if args.method=="agc":
         model = attn_method_model()
     elif args.method in ["rollout", "tam"]:
         from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
