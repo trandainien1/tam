@@ -1037,7 +1037,7 @@ if __name__ == '__main__':
                      'chefer1',
                      'tis',
                      'vitcx',
-                     
+                     'chefer2'
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
@@ -1131,7 +1131,8 @@ if __name__ == '__main__':
         it = TISWrapper(model)
     elif args.method == 'vitcx':
         it = ViTCXWrapper(model)
-
+    elif args.method == 'chefer2':
+        it = Chefer2Wrapper(model)
     else:
         it = InterpretTransformer(model, img_size)
     
