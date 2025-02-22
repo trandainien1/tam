@@ -33,7 +33,7 @@ class TIS:
         """
 
         # Check that model is a ViT
-        assert isinstance(model, VisionVIT) or isinstance(model, TimmVIT), "Transformer architecture not recognised"
+        # assert isinstance(model, VisionVIT) or isinstance(model, TimmVIT), "Transformer architecture not recognised"
 
         # Save model
         self.model = model
