@@ -35,7 +35,7 @@ from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.ViTCX.vitcx import ViTCXWrapper
 # from vit_xai_methods.BT.bt import BTTWrapper, BTHWrapper
-# from vit_xai_methods.TAM.tam import TAMWrapper
+from vit_xai_methods.TAM.tam import TAMWrapper
 # from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
 
 # -------------------- datasets ---------------------
@@ -1037,6 +1037,7 @@ if __name__ == '__main__':
                      'chefer1',
                      'tis',
                      'vitcx',
+                     'tam',
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
@@ -1130,6 +1131,8 @@ if __name__ == '__main__':
         it = TISWrapper(model)
     elif args.method == 'vitcx':
         it = ViTCXWrapper(model)
+    elif args.method == 'tam':
+        it = TAMWrapper(model)
     else:
         it = InterpretTransformer(model, img_size)
     
