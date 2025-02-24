@@ -1045,6 +1045,7 @@ if __name__ == '__main__':
                      'chefer2',
                      'btt',
                      'bth',
+                     'scoreagc',
                      ],
             help='')
     parser.add_argument('--batch_size', type=int,
