@@ -35,8 +35,8 @@ from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.TIS.tis import TISWrapper
 from vit_xai_methods.ViTCX.vitcx import ViTCXWrapper
 from vit_xai_methods.BT.bt import BTTWrapper, BTHWrapper
-
 from vit_xai_methods.Chefer2.chefer2 import Chefer2Wrapper
+from vit_xai_methods.Better_AGCAM.Better_AGCAM import ScoreAGC
 
 MODEL = 'vit_base_patch16_224'
 DEVICE = 'cuda'
@@ -1145,6 +1145,16 @@ if __name__ == '__main__':
         it = BTTWrapper(model)
     elif args.method == 'bth':
         it = BTHWrapper(model)
+    elif args.method == 'scoreagc':
+        it = ScoreAGC(
+            model, 
+            plus=0, 
+            vitcx_score_formula=False, 
+            add_noise=True,
+            score_minmax_norm=True,
+            normalize_cam_heads=True,
+            is_head_fuse=False,
+        )
     else:
         it = InterpretTransformer(model, img_size)
     
