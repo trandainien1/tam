@@ -31,6 +31,9 @@ from torchvision.transforms import Resize
 
 from fast_pytorch_kmeans import KMeans
 
+# XAI methods
+from vit_xai_methods.Better_AGCAM.Better_AGCAM import ScoreAGC
+
 class ImageNetBboxDataset(Dataset):
     def __init__(self, img_path, anno_path, transform, num_samples=1, seed=0):
         print(f'ramdon seed: {seed}, num_samples: {num_samples}')
@@ -1056,6 +1059,7 @@ if __name__ == '__main__':
                 'agc',
                 'better_agc_plus1',
                 'better_agc_cluster',
+                'scoreagc'
             ],
             help='')
     parser.add_argument('--batch_size', type=int,
@@ -1087,6 +1091,14 @@ if __name__ == '__main__':
         model.load_state_dict(state_dict, strict=True)
         model = model.eval()
         model = model.cuda()
+    elif args.method == 'scoreagc':
+        MODEL = 'vit_base_patch16_224'
+        timm_model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
+        state_dict = timm_model.state_dict()
+        model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=1000)
+        model.load_state_dict(state_dict, strict=True)
+        model = model.eval()
+        model = model.cuda()
     else:
         from baselines.ViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
         
@@ -1096,6 +1108,8 @@ if __name__ == '__main__':
         it = BetterAGC(model)
     elif args.method == 'agc':
         it = AGCAM(model)
+    elif args.method == 'scoreagc':
+        it = ScoreAGC(model)
     elif args.method == 'better_agc_plus1':
         it = BetterAGC_plus1(model)
     elif args.method == 'better_agc_cluster':
