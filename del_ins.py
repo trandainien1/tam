@@ -1149,12 +1149,12 @@ if __name__ == '__main__':
     elif args.method == 'scoreagc':
         it = ScoreAGC(
             model, 
-            plus=0, 
-            vitcx_score_formula=False, 
-            add_noise=True,
-            score_minmax_norm=True,
-            normalize_cam_heads=True,
-            is_head_fuse=False,
+            # plus=0, 
+            # vitcx_score_formula=False, 
+            # add_noise=True,
+            # score_minmax_norm=True,
+            # normalize_cam_heads=True,
+            # is_head_fuse=False,
         )
     else:
         it = InterpretTransformer(model, img_size)

@@ -330,10 +330,20 @@ class BetterAGC_softmax:
 
         return predicted_class, saliency_map
 
-
-
+# update date: 17/3
+# !default values is the best config to achieve the performance in the paper
 class ScoreAGC:
-    def __init__(self, model, attention_matrix_layer = 'before_softmax', attention_grad_layer = 'after_softmax', head_fusion='sum', layer_fusion='sum', normalize_cam_heads=True, score_minmax_norm=True, add_noise=False, plus=1, vitcx_score_formula=False, is_head_fuse=False):
+    def __init__(self, model, attention_matrix_layer = 'before_softmax', attention_grad_layer = 'after_softmax', head_fusion='sum', layer_fusion='sum', 
+                 normalize_cam_heads=True, 
+                 score_minmax_norm=True, 
+                 add_noise=True, 
+                 plus=0, 
+                 vitcx_score_formula=False, 
+                 is_head_fuse=False,
+                 is_binarize_cam_of_heads=False,
+                 handle_pixel_coverage_bias=False,
+                 score_formula='increase_in_confidence',
+                 ):
         """
         Args:
             model (nn.Module): the Vision Transformer model to be explained
@@ -355,6 +365,9 @@ class ScoreAGC:
         self.plus = plus
         self.vitcx_score_formula = vitcx_score_formula
         self.is_head_fuse = is_head_fuse
+        self.is_binarize_cam_of_heads = is_binarize_cam_of_heads
+        self.handle_pixel_coverage_bias = handle_pixel_coverage_bias
+        self.score_formula = score_formula # ['softmax_logit', 'increase_in_confidence'] 
 
         for layer_num, (name, module) in enumerate(self.model.named_modules()):
             if attention_matrix_layer in name:
@@ -424,16 +437,49 @@ class ScoreAGC:
 
         return prediction, mask, output
 
+    def binarize_head_cams(self, head_cams):
+        head_cams = torch.squeeze(head_cams) # (1, 12, 12,1, 14, 14) -> (12, 12, 14, 14)
+        cam_1_indice_list = []
+        bin_cam_list = []
+        for i in range(head_cams.shape[0]):
+            for j in range(head_cams.shape[1]):
+                cam = head_cams[i][j]
+                # Computer the number of tokens to keep based on the ratio
+                n_tokens = int(0.5 * cam.flatten().shape[0]) # 196 // 2 = 98 tokens
+
+                # Compute the indexes of the n_tokens with the highest values in the raw mask
+                cam_1_indices = cam.flatten().topk(n_tokens)[1]  # indices where value will be 1
+
+                # Create binary mask
+                bin_cam_flatten = torch.zeros_like(cam.flatten())
+                bin_cam_flatten[cam_1_indices] = 1
+
+                # Append current mask to lists
+                cam_1_indice_list.append(cam_1_indices)
+                bin_cam_list.append(bin_cam_flatten.reshape(14, 14))
+        return bin_cam_list 
+
+
     def generate_scores(self, head_cams, prediction, output_truth, image):
         with torch.no_grad():
             tensor_heatmaps = head_cams[0]
+            
+
             if self.is_head_fuse:
                 tensor_heatmaps = tensor_heatmaps.reshape(12, 1, 14, 14)
             else:
                 tensor_heatmaps = tensor_heatmaps.reshape(144, 1, 14, 14)
-            tensor_heatmaps = transforms.Resize((224, 224))(tensor_heatmaps)
-    
-            if self.normalize_cam_heads:
+            tensor_heatmaps = transforms.Resize((224, 224))(tensor_heatmaps)        
+
+            if self.is_binarize_cam_of_heads:
+                heatmaps_list = self.binarize_head_cams(head_cams)
+                tensor_heatmaps = torch.stack(heatmaps_list).unsqueeze(1)
+                
+                tensor_heatmaps = transforms.Resize((224, 224))(tensor_heatmaps)   
+                # tensor_heatmaps = F.interpolate(tensor_heatmaps, size=(image.shape[2], image.shape[3]), mode='nearest')
+
+                      
+            elif self.normalize_cam_heads:
                 # Compute min and max along each image
                 min_vals = tensor_heatmaps.amin(dim=(2, 3), keepdim=True)  # Min across width and height
                 max_vals = tensor_heatmaps.amax(dim=(2, 3), keepdim=True)  # Max across width and height
@@ -466,10 +512,15 @@ class ScoreAGC:
                 class_p = output_truth[0, prediction.item()]
                 agc_scores = p_mask_with_noise - p_x_with_noise + class_p
             else:
-            # print("After get output from model: ")
-            # print(torch.cuda.memory_allocated()/1024**2)
-                agc_scores = output_mask[:, prediction.item()] - output_truth[0, prediction.item()]
+                if  self.score_formula == 'softmax_logit':
+                    softmax_tensor = F.softmax(output_mask, dim=1)
+                    agc_scores = softmax_tensor[:, prediction.item()]
+
+                elif self.score_formula == 'increase_in_confidence':
+                    # increase in confidence
+                    agc_scores = output_mask[:, prediction.item()] - output_truth[0, prediction.item()]
             
+            # if self.score_formula == 'increase_in_confidence':
             if self.score_minmax_norm:   
                 agc_scores = (agc_scores - agc_scores.min() ) / (agc_scores.max() - agc_scores.min())
             else:
@@ -492,6 +543,10 @@ class ScoreAGC:
         else:
             mask = (agc_scores.view(12, 12, 1, 1, 1) * head_cams[0]).sum(axis=(0, 1))
 
+        if self.handle_pixel_coverage_bias:
+            raw_sal = head_cams.squeeze().sum(axis=(0, 1)).unsqueeze(0) # (1, 14, 14)
+            mask /= raw_sal
+
         mask = mask.squeeze()
         return mask
 
@@ -508,6 +563,7 @@ class ScoreAGC:
             x = x.unsqueeze(dim=0)
 
         with torch.enable_grad():
+            # * Head cam shape: (1, 12, 12, 1, 14, 14) - 12 layers - 12 heads - 1 saliency of shape 14x14 = 196 tokens
             predicted_class, head_cams, output_truth = self.generate_cams_of_heads(x)
 
         # print("After generate cams: ")
@@ -515,6 +571,7 @@ class ScoreAGC:
         # print()
         
         # Define the class to explain. If not explicit, use the class predicted by the model
+     
         if class_idx is None:
             class_idx = predicted_class
             # print("class idx", class_idx)
@@ -534,7 +591,7 @@ class ScoreAGC:
         # print(torch.cuda.memory_allocated()/1024**2)
         # print()
 
-        return saliency_map
+        return predicted_class, saliency_map
 
 
 class ScoreAGC_head_fusion:
