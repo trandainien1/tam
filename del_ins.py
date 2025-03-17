@@ -49,7 +49,7 @@ datasets_dict = {
         'class_fn': ImageNet,
         'n_output': 1000,
         'split': 'val',
-        'indices_csv': 'datasets/2000idx_ILSVRC2012.csv',
+        'indices_csv': 'datasets/idx_ILSVRC2012.csv',
         'transform': transforms.Compose([
             transforms.ToTensor(),
             transforms.Resize((224, 224)),
@@ -1068,28 +1068,6 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-     # ---------------------------------   Load model  ------------------------------------    
-    # Original
-    # MODEL = 'vit_base_patch16_224'
-
-    # if args.method in [
-    #     'tam', 'raw_attn', 'rollout'
-    # ]:
-    #     from baselines.ViT.ViT_new import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
-    #     model = eval(args.arch)(pretrained=True).cuda()
-        
-    # elif 'agc' in args.method:
-    #     timm_model = timm.create_model(model_name='vit_base_patch16_224', pretrained=True, pretrained_cfg='orig_in21k_ft_in1k')
-    #     state_dict = timm_model.state_dict()
-    #     model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=1000)
-    #     model.load_state_dict(state_dict, strict=True)
-    #     model = model.eval()
-    #     model = model.cuda()
-    # else:
-    #     from baselines.ViT.ViT_LRP import vit_base_patch16_224, vit_large_patch16_224, deit_base_patch16_224, vit_base_patch16_384
-    #     model = eval(args.arch)(pretrained=True).cuda()
-
-
     def attn_method_model():
         state_dict = model_zoo.load_url('https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_base_p16_224-80ecf9dd.pth', progress=True, map_location='cuda')
         model = ViT_Ours.create_model(MODEL, pretrained=True, num_classes=class_num).to('cuda')
@@ -1165,32 +1143,7 @@ if __name__ == '__main__':
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406], 
             std=[0.229, 0.224, 0.225]),
-    ])
-    
-    batch_size = args.batch_size
-    num_samples = args.num_samples
-
-    # blur
-    if args.blur:
-        print("use blur insertion")
-        insertion = CausalMetric(model, 'ins', img_size * 8, substrate_fn=blur)
-    else:
-        print("use zero insertion")
-        insertion = CausalMetric(model, 'ins', img_size * 8, substrate_fn=torch.zeros_like)
-    
-    deletion = CausalMetric(model, 'del', img_size * 8, substrate_fn=torch.zeros_like)
-
-    scores = {'del': [], 'ins': []}
-
-    # ----------- get dataset -----------
-    # dataset = datasets.ImageFolder('/root/datasets/ImageNet/val', preprocess)
-
-    dataset, n_output = get_dataset(name='imagenet', root='.')
-    upsampling_fn = Resize(dataset[0][0].shape[-2:], antialias=True)
-
-    np.random.seed(0)
-    # max_index = np.random.randint(num_samples, len(dataset))
-    # print("subset indices: ", [max_index-num_samples, max_index])
+    ] print("subset indices: ", [max_index-num_samples, max_index])
     # sub_dataset = torch.utils.data.Subset(dataset, indices=range(max_index-num_samples, max_index))
     sub_dataset = dataset
     
