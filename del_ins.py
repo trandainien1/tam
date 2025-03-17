@@ -49,7 +49,7 @@ datasets_dict = {
         'class_fn': ImageNet,
         'n_output': 1000,
         'split': 'val',
-        'indices_csv': 'datasets/2000idx_ILSVRC2012.csv',
+        'indices_csv': 'datasets/idx_ILSVRC2012.csv',
         'transform': transforms.Compose([
             transforms.ToTensor(),
             transforms.Resize((224, 224)),
