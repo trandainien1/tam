@@ -1209,10 +1209,10 @@ if __name__ == '__main__':
         sub_dataset, batch_size=batch_size, shuffle=True,
         num_workers=4, pin_memory=True)
 
+    print(f"Insertion and Deletion - from {min_index} - to {max_index}")
+
     images = np.empty((len(data_loader), batch_size, 3, img_size, img_size))
     iterator = tqdm(data_loader, total=len(data_loader))
-    
-    print(f"Insertion and Deletion - from {min_index} - to {max_index}")
 
     for j, (img, _) in enumerate(iterator):
         if args.method == 'tam':
