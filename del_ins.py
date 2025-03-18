@@ -58,6 +58,16 @@ datasets_dict = {
     }
 }
 
+# Get the path to the indices CSV file
+indices_csv_path = datasets_dict['imagenet']['indices_csv']
+
+# Read the indices from the CSV file
+subset_indices = pd.read_csv(indices_csv_path, header=None)[0].to_numpy()
+
+# Get the max and min indices
+max_index = subset_indices.max()
+min_index = subset_indices.min()
+
 def get_dataset(name, root):
     cur_dict = datasets_dict[name]
     if name=='imagenet':
@@ -1201,6 +1211,8 @@ if __name__ == '__main__':
 
     images = np.empty((len(data_loader), batch_size, 3, img_size, img_size))
     iterator = tqdm(data_loader, total=len(data_loader))
+    
+    print(f"Insertion and Deletion - from {min_index} - to {max_index}")
 
     for j, (img, _) in enumerate(iterator):
         if args.method == 'tam':
