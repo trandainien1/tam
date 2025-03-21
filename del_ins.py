@@ -1227,7 +1227,6 @@ if __name__ == '__main__':
             exp = it.attribution(img.cuda())
         elif args.method == 'chefer1':
             saliency_map = it.generate(img.cuda()) #saliency_map.shape = [14, 14]
-            print('[DEBUG] saliency map: ', saliency_map.shape)
             # saliency_map = saliency_map.reshape((1, *saliency_map.shape)) #saliency_map.shape = [1, 14, 14]
             
             if saliency_map.shape != img.shape:
